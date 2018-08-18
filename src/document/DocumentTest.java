@@ -32,4 +32,17 @@ public class DocumentTest {
         assertEquals(new BasicDocument("sentence, with, lots, of, commas.!  "
                 + "(And some poaren)).  The output is: 7.5.").getNumSentences(), 4);
     }
+
+    @Test
+    public void getFleschScore() {
+        assertEquals(new BasicDocument("A").getFleschScore(), 121.220, 0.001);
+        assertEquals(new BasicDocument("A.").getFleschScore(), 121.220, 0.001);
+        assertEquals(new BasicDocument("Aba.").getFleschScore(), 36.620, 0.001);
+
+        assertEquals(new BasicDocument("Here is a series of test sentences. Your program should "
+                + "find 3 sentences, 33 words, and 49 syllables. Not every word will have "
+                + "the correct amount of syllables (example, for example), "
+                + "but most of them will.")
+                .getFleschScore(), 70.051, 0.001);
+    }
 }
