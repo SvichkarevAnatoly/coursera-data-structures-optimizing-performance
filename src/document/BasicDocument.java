@@ -1,5 +1,8 @@
 package document;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
  * A naive implementation of the Document abstract class.
  *
@@ -31,9 +34,11 @@ public class BasicDocument extends Document {
      */
     @Override
     public int getNumWords() {
-        //TODO: Implement this method in week 2 according to the comments above.
-        // See the Module 2 support videos if you need help.
-        return 0;
+        return getWords().size();
+    }
+
+    public List<String> getWords() {
+        return getTokens("[a-zA-Z]+");
     }
 
     /**
@@ -50,9 +55,8 @@ public class BasicDocument extends Document {
      */
     @Override
     public int getNumSentences() {
-        //TODO: Implement this method.  See the Module 2 support videos
-        // if you need help.
-        return 0;
+        String[] split = getText().split("[\\.+|!+|\\?+]+");
+        return Stream.of(split).filter(w -> !w.isEmpty()).toArray(String[]::new).length;
     }
 
     /**
@@ -71,12 +75,11 @@ public class BasicDocument extends Document {
      */
     @Override
     public int getNumSyllables() {
-        //TODO: Implement this method in week 2.  See the Module 2 support videos
-        // if you need help.  And note that there is no need to use a regular
-        // expression for the syllable counting.  We recommend you implement
-        // the helper function countSyllables in Document.java using a loop,
-        // and then call it here on each word.
-        return 0;
+        int counter = 0;
+        for (String word : getWords()) {
+            counter += countSyllables(word);
+        }
+        return counter;
     }
 
 
