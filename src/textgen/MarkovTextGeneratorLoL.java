@@ -1,8 +1,12 @@
 package textgen;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An implementation of the MTG interface that uses a list of lists.
@@ -12,7 +16,7 @@ import java.util.Random;
 public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 
     // The list of words with their next words
-    private List<ListNode> wordList;
+    private Map<String, ListNode> wordMap;
 
     // The starting "word"
     private String starter;
@@ -21,7 +25,7 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
     private Random rnGenerator;
 
     public MarkovTextGeneratorLoL(Random generator) {
-        wordList = new LinkedList<ListNode>();
+        wordMap = new HashMap<>();
         starter = "";
         rnGenerator = generator;
     }
@@ -32,7 +36,25 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
      */
     @Override
     public void train(String sourceText) {
-        // TODO: Implement this method
+        if (sourceText == null) {
+            return;
+        }
+        List<String> tokens = getTokens(sourceText, "\\S+");
+        if (tokens.size() < 2) {
+            return;
+        }
+
+        starter = tokens.get(0);
+        tokens.add(starter); // for link last word to starter word
+        for (int i = 0; i < tokens.size() - 1; i++) {
+            String currentWord = tokens.get(i);
+            String nextWord = tokens.get(i + 1);
+
+            if (!wordMap.containsKey(currentWord)) {
+                wordMap.put(currentWord, new ListNode(currentWord));
+            }
+            wordMap.get(currentWord).addNextWord(nextWord);
+        }
     }
 
     /**
@@ -40,16 +62,27 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
      */
     @Override
     public String generateText(int numWords) {
-        // TODO: Implement this method
-        return null;
+        if (starter.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder text = new StringBuilder();
+
+        String currWord = starter;
+        for (int i = 0; i < numWords; i++) {
+            text.append(currWord).append(' ');
+            currWord = wordMap.get(currWord)
+                    .getRandomNextWord(rnGenerator);
+        }
+
+        return text.toString().trim();
     }
 
 
-    // Can be helpful for debugging
     @Override
     public String toString() {
         String toReturn = "";
-        for (ListNode n : wordList) {
+        for (ListNode n : wordMap.values()) {
             toReturn += n.toString();
         }
         return toReturn;
@@ -60,11 +93,22 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
      */
     @Override
     public void retrain(String sourceText) {
-        // TODO: Implement this method.
+        wordMap = new HashMap<>();
+        starter = "";
+        train(sourceText);
     }
 
-    // TODO: Add any private helper methods you need here.
+    public static List<String> getTokens(String text, String pattern) {
+        ArrayList<String> tokens = new ArrayList<>();
+        Pattern tokSplitter = Pattern.compile(pattern);
+        Matcher m = tokSplitter.matcher(text);
 
+        while (m.find()) {
+            tokens.add(m.group());
+        }
+
+        return tokens;
+    }
 
     /**
      * This is a minimal set of tests.  Note that it can be difficult
@@ -125,7 +169,7 @@ class ListNode {
 
     ListNode(String word) {
         this.word = word;
-        nextWords = new LinkedList<String>();
+        nextWords = new ArrayList<>();
     }
 
     public String getWord() {
@@ -137,10 +181,7 @@ class ListNode {
     }
 
     public String getRandomNextWord(Random generator) {
-        // TODO: Implement this method
-        // The random number generator should be passed from
-        // the MarkovTextGeneratorLoL class
-        return null;
+        return nextWords.get(generator.nextInt(nextWords.size()));
     }
 
     public String toString() {
