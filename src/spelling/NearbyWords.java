@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -124,38 +125,54 @@ public class NearbyWords implements SpellingSuggest {
     public List<String> suggestions(String word, int numSuggestions) {
 
         // initial variables
-        List<String> queue = new LinkedList<String>();     // String to explore
-        HashSet<String> visited = new HashSet<String>();   // to avoid exploring the same
+        LinkedList<String> queue = new LinkedList<String>();     // String to explore
         // string multiple times
+        Set<String> visited = new HashSet<String>();   // to avoid exploring the same
         List<String> retList = new LinkedList<String>();   // words to return
-
 
         // insert first node
         queue.add(word);
         visited.add(word);
 
-        // TODO: Implement the remainder of this method, see assignment for algorithm
+        while (!queue.isEmpty()) {
+            String currentString = queue.remove();
+            List<String> mutations = distanceOne(currentString, true);
+            for (String mutation : mutations) {
+                if (visited.contains(mutation)) {
+                    continue;
+                }
+
+                visited.add(mutation);
+                queue.add(mutation);
+
+                if (dict.isWord(mutation)) {
+                    retList.add(mutation);
+                    if (retList.size() == numSuggestions) {
+                        return retList;
+                    }
+                }
+            }
+        }
 
         return retList;
 
     }
 
     public static void main(String[] args) {
-	   /* basic testing code to get started
-	   String word = "i";
-	   // Pass NearbyWords any Dictionary implementation you prefer
-	   Dictionary d = new DictionaryHashSet();
-	   DictionaryLoader.loadDictionary(d, "data/dict.txt");
-	   NearbyWords w = new NearbyWords(d);
-	   List<String> l = w.distanceOne(word, true);
-	   System.out.println("One away word Strings for for \""+word+"\" are:");
-	   System.out.println(l+"\n");
+        // basic testing code to get started
+        String word = "i";
+        // Pass NearbyWords any Dictionary implementation you prefer
+        Dictionary d = new DictionaryHashSet();
+        DictionaryLoader.loadDictionary(d, "data/dict.txt");
+        NearbyWords w = new NearbyWords(d);
+        List<String> l = w.distanceOne(word, true);
+        System.out.println("One away word Strings for \"" + word + "\" are:");
+        System.out.println(l + "\n");
 
-	   word = "tailo";
-	   List<String> suggest = w.suggestions(word, 10);
-	   System.out.println("Spelling Suggestions for \""+word+"\" are:");
-	   System.out.println(suggest);
-	   */
+        word = "tailo";
+        List<String> suggest = w.suggestions(word, 10);
+        System.out.println("Spelling Suggestions for \"" + word + "\" are:");
+        System.out.println(suggest);
     }
 
 }
