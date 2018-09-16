@@ -77,7 +77,16 @@ public class NearbyWords implements SpellingSuggest {
      * @return
      */
     public void insertions(String s, List<String> currentList, boolean wordsOnly) {
-        // TODO: Implement this method
+        int length = s.length();
+        for (int i = 0; i <= length; i++) {
+            for (char charCode = 'a'; charCode <= 'z'; charCode++) {
+                final String newWord = s.substring(0, i) + charCode + s.substring(i, length);
+                if (!currentList.contains(newWord) &&
+                        (!wordsOnly || dict.isWord(newWord))) {
+                    currentList.add(newWord);
+                }
+            }
+        }
     }
 
     /**
@@ -90,7 +99,17 @@ public class NearbyWords implements SpellingSuggest {
      * @return
      */
     public void deletions(String s, List<String> currentList, boolean wordsOnly) {
-        // TODO: Implement this method
+        if (s.length() <= 1) {
+            return;
+        }
+
+        for (int i = 0; i < s.length(); i++) {
+            final String newWord = s.substring(0, i) + s.substring(i + 1);
+            if (!currentList.contains(newWord) &&
+                    (!wordsOnly || dict.isWord(newWord))) {
+                currentList.add(newWord);
+            }
+        }
     }
 
     /**
